@@ -8,9 +8,9 @@ import org.springframework.context.annotation.ComponentScan;
 @EnableAutoConfiguration
 @EnableConfigServer
 @ComponentScan
-public class ConfigurationServerApplication {
+public class Application {
 
 	public static void main(String[] args) {
-		SpringApplication.run(ConfigurationServerApplication.class, args);
+		SpringApplication.run(Application.class, args);
 	}
 }
