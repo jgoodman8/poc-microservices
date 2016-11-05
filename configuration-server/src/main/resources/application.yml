@@ -4,7 +4,7 @@ spring:
       server:
         git:
           # uri: https://github.com/anilallewar/sample-config
-          uri: file://Users/jguzman/Desktop/Spring/Gradox/conf/sample-config
+          uri: file://C:/Users/jguzman/Desktop/Spring/Gradox/conf/sample-config
 # While in development mode, you can configure the config server to pick up configuration files from
 # the file system
           
