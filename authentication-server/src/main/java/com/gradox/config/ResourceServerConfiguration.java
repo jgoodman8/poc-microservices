@@ -12,7 +12,7 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Res
  * OAuth2 authentication is successful; the server also becomes a resource
  * server.
  * 
- * @author anilallewar
+ * @author jguzmanfd
  *
  */
 @Configuration
@@ -31,10 +31,10 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 	 */
 	@Override
 	public void configure(HttpSecurity http) throws Exception {
-		// @formatter:off
-		http.requestMatchers().antMatchers("/me").and().authorizeRequests().antMatchers("/me")
-				.access("#oauth2.hasScope('read')");
-		// @formatter:on
+
+		http.requestMatchers().antMatchers("/me", "/register")	// Allowed request
+				.and().authorizeRequests().antMatchers("/register").permitAll()	// Request outside the resource server
+				.and().authorizeRequests().antMatchers("/me").access("#oauth2.hasScope('read')");	// Request with read grants in resource server
 	}
 
 	/**

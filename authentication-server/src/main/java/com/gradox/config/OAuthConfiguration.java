@@ -18,7 +18,13 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.code.JdbcAuthorizationCodeServices;
-import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
+//import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
+import org.springframework.security.oauth2.provider.token.TokenStore;
+//import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
+import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
+import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
+
+//import com.netflix.governator.annotations.binding.Primary;
 
 /**
  * The Class OAuth2Config defines the authorization server that would
@@ -30,7 +36,7 @@ import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 public class OAuthConfiguration extends AuthorizationServerConfigurerAdapter {
 
 	@Autowired
-	private AuthenticationManager auth;
+	private AuthenticationManager authenticationManager;
 
 	@Autowired
 	private DataSource dataSource;
@@ -42,21 +48,46 @@ public class OAuthConfiguration extends AuthorizationServerConfigurerAdapter {
 	 * <code>auth-server.yml</code> file stored in the Spring Cloud config
 	 * github repository.
 	 * 
+	 * Devuelve una instancia de almacenamiento de tokens guardados en base de
+	 * datos
+	 * 
 	 * @return
 	 */
+	// @Bean
+	// public JdbcTokenStore tokenStore() {
+	// return new JdbcTokenStore(dataSource);
+	// }
+
+	// Modificación para usar JWT
 	@Bean
-	public JdbcTokenStore tokenStore() {
-		return new JdbcTokenStore(dataSource);
+	public TokenStore tokenStore() {
+		return new JwtTokenStore(accessTokenConverter());
 	}
 
+	// Añadido para usar JWT
+	@Bean
+	public JwtAccessTokenConverter accessTokenConverter() {
+		JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
+		converter.setSigningKey("123");
+		return converter;
+	}
+
+	/**
+	 * Services for issuing and storing authorization codes.
+	 * 
+	 * @return
+	 */
 	@Bean
 	protected AuthorizationCodeServices authorizationCodeServices() {
 		return new JdbcAuthorizationCodeServices(dataSource);
 	}
 
+	/**
+	 * Asigna el BCryptPasswordEncoder como password encoder en la config de la
+	 * autenticación
+	 */
 	@Override
-	public void configure(AuthorizationServerSecurityConfigurer security)
-			throws Exception {
+	public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
 		security.passwordEncoder(passwordEncoder);
 	}
 
@@ -69,34 +100,44 @@ public class OAuthConfiguration extends AuthorizationServerConfigurerAdapter {
 	 * can be processed.
 	 */
 	@Override
-	public void configure(AuthorizationServerEndpointsConfigurer endpoints)
-			throws Exception {
-		endpoints.authorizationCodeServices(authorizationCodeServices())
-				.authenticationManager(auth).tokenStore(tokenStore())
-				.approvalStoreDisabled();
+	public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+		endpoints.authorizationCodeServices(authorizationCodeServices()).authenticationManager(authenticationManager)
+				.tokenStore(tokenStore()).approvalStoreDisabled();
+		// endpoints.tokenStore(tokenStore())
+		// .accessTokenConverter(accessTokenConverter())
+		// .authenticationManager(authenticationManager)
 	}
+
+	/*
+	 * @Bean
+	 * 
+	 * @Primary public DefaultTokenServices tokenServices() {
+	 * DefaultTokenServices defaultTokenServices = new DefaultTokenServices();
+	 * defaultTokenServices.setTokenStore(tokenStore());
+	 * defaultTokenServices.setSupportRefreshToken(true); return
+	 * defaultTokenServices; }
+	 */
 
 	/**
 	 * Setup the client application which attempts to get access to user's
 	 * account after user permission.
+	 * 
+	 * endpoints /oauth/(token authorize)
+	 * 
+	 * ????
 	 */
 	@Override
-	public void configure(ClientDetailsServiceConfigurer clients)
-			throws Exception {
-	
-		clients.jdbc(dataSource)
-				.passwordEncoder(passwordEncoder)
-				.withClient("client")
-				.authorizedGrantTypes("authorization_code", "client_credentials", 
-						"refresh_token","password", "implicit")
-				.authorities("ROLE_CLIENT")
-				.resourceIds("apis")
-				.scopes("read")
-				.secret("secret")
+	public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
+
+		// Filtra por cliend_id con el que se realice la llamada
+		// secret para aceptar la petición
+		clients.jdbc(dataSource).passwordEncoder(passwordEncoder).withClient("client")
+				.authorizedGrantTypes("authorization_code", "client_credentials", "refresh_token", "password",
+						"implicit") // tipos de autenticación permitidos
+				.authorities("ROLE_CLIENT").resourceIds("apis").scopes("read").secret("secret")
 				.accessTokenValiditySeconds(300);
-	
 	}
-	
+
 	/**
 	 * Configure the {@link AuthenticationManagerBuilder} with initial
 	 * configuration to setup users.
@@ -106,8 +147,7 @@ public class OAuthConfiguration extends AuthorizationServerConfigurerAdapter {
 	 */
 	@Configuration
 	@Order(Ordered.LOWEST_PRECEDENCE - 20)
-	protected static class AuthenticationManagerConfiguration extends
-			GlobalAuthenticationConfigurerAdapter {
+	protected static class AuthenticationManagerConfiguration extends GlobalAuthenticationConfigurerAdapter {
 
 		@Autowired
 		private DataSource dataSource;
@@ -118,12 +158,22 @@ public class OAuthConfiguration extends AuthorizationServerConfigurerAdapter {
 		@Override
 		public void init(AuthenticationManagerBuilder auth) throws Exception {
 			// @formatter:off
-			auth.jdbcAuthentication().dataSource(dataSource).withUser("dave")
-					.password("secret").roles("USER");
-			auth.jdbcAuthentication().dataSource(dataSource).withUser("anil")
-					.password("password").roles("ADMIN");
+//			auth.jdbcAuthentication().dataSource(dataSource).withUser("dave").password("secret").roles("USER");
+//			auth.jdbcAuthentication().dataSource(dataSource).withUser("anil").password("password").roles("ADMIN");
+			// @formatter:on
+		}
+
+		@Autowired
+		public void globalUserDetails(final AuthenticationManagerBuilder auth) throws Exception {
+			// @formatter:off
+			// auth.inMemoryAuthentication().withUser("john").password("123").roles("USER").and().withUser("tom")
+			// .password("111").roles("ADMIN");
+			auth.jdbcAuthentication().dataSource(dataSource)
+					.usersByUsernameQuery("select username, password, enabled from users where username=?");
+			// .authoritiesByUsernameQuery("select username, role from
+			// user_roles where username=?");
 			// @formatter:on
 		}
 	}
-	
+
 }
