@@ -169,9 +169,8 @@ public class OAuthConfiguration extends AuthorizationServerConfigurerAdapter {
 			// auth.inMemoryAuthentication().withUser("john").password("123").roles("USER").and().withUser("tom")
 			// .password("111").roles("ADMIN");
 			auth.jdbcAuthentication().dataSource(dataSource)
-					.usersByUsernameQuery("select username, password, enabled from users where username=?");
-			// .authoritiesByUsernameQuery("select username, role from
-			// user_roles where username=?");
+					.usersByUsernameQuery("select username, password, enabled from users where username=?")
+					.authoritiesByUsernameQuery("select username, authority from users where username=?");
 			// @formatter:on
 		}
 	}

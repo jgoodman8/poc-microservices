@@ -45,6 +45,8 @@ public class AuthUserController {
 		)
 	public ResponseEntity<?> registerNewUser(User user) {
 		try {
+			System.out.println(user.toString());
+			user.setEnabled(true);
 			User res = userDAO.register(user);
 			return new ResponseEntity<>(res, HttpStatus.OK);
 		} catch (Exception e) {

@@ -1,5 +1,14 @@
 
-DROP TABLE IF EXISTS ClientDetails;
+DROP TABLE IF EXISTS users CASCADE;
+CREATE TABLE users(
+  id INTEGER NOT NULL PRIMARY KEY,
+  username varchar(50) NOT NULL,
+  password varchar(50) NOT NULL,
+  enabled boolean NOT NULL DEFAULT TRUE,
+  authority varchar(50) NOT NULL
+);
+
+DROP TABLE IF EXISTS ClientDetails CASCADE;
 CREATE TABLE ClientDetails(
   appId varchar(256) NOT NULL PRIMARY KEY,
   resourceIds varchar(256) DEFAULT NULL,
@@ -16,9 +25,11 @@ CREATE TABLE ClientDetails(
 
 DROP TABLE IF EXISTS authorities;
 CREATE TABLE authorities(
-  username varchar(50) NOT NULL,
+  id INTEGER NOT NULL,
+  /*username varchar(50) NOT NULL,*/
   authority varchar(50) NOT NULL,
-  CONSTRAINT AuthoritiesPK PRIMARY KEY (username, authority)
+  CONSTRAINT AuthorityFK FOREIGN KEY (id) REFERENCES Users (id) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT AuthoritiesPK PRIMARY KEY (id, authority)  
 );
 
 
@@ -64,12 +75,4 @@ CREATE TABLE oauth_refresh_token(
   authentication bytea
 );
 
-
-DROP TABLE IF EXISTS users;
-CREATE TABLE users(
-  id INTEGER NOT NULL PRIMARY KEY,
-  username varchar(50) NOT NULL,
-  password varchar(50) NOT NULL,
-  enabled boolean NOT NULL DEFAULT TRUE
-);
 

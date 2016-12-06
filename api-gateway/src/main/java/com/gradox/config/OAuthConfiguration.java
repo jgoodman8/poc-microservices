@@ -55,7 +55,10 @@ public class OAuthConfiguration extends WebSecurityConfigurerAdapter  {
         	.authorizeRequests()
         	//Allow access to all static resources without authentication
         	.antMatchers("/","/**/*.html").permitAll()
-        	.anyRequest().authenticated()
+//        	.and().authorizeRequests()
+        	//.antMatchers(HttpMethod.GET, "/api/loggedinuser/register").permitAll()
+//      	.anyRequest().authenticated()
+//        	.and().authorizeRequests()
         	.antMatchers(HttpMethod.GET, "/api/user/**","/api/task/**").access("#oauth2.hasScope('read')")
             .antMatchers(HttpMethod.OPTIONS, "/api/user/**","/api/task/**").access("#oauth2.hasScope('read')")
             .antMatchers(HttpMethod.POST, "/api/user/**","/api/task/**").access("#oauth2.hasScope('write')")
