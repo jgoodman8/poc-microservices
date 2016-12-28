@@ -24,9 +24,11 @@ public class TaskConfiguration extends ResourceServerConfigurerAdapter {
 	@Override
 	public void configure(HttpSecurity http) throws Exception {
 		// @formatter:off
-		http.requestMatchers()
+		http.authorizeRequests().antMatchers("/**").permitAll();
+			
+		/*.requestMatchers()
 			.antMatchers("/**")
-		.and()
+			.and()
 			.authorizeRequests()
 				.anyRequest()
 					.authenticated()
@@ -35,7 +37,7 @@ public class TaskConfiguration extends ResourceServerConfigurerAdapter {
 		            .antMatchers(HttpMethod.POST, "/**").access("#oauth2.hasScope('write')")
 		            .antMatchers(HttpMethod.PUT, "/**").access("#oauth2.hasScope('write')")
 		            .antMatchers(HttpMethod.PATCH, "/**").access("#oauth2.hasScope('write')")
-		            .antMatchers(HttpMethod.DELETE, "/**").access("#oauth2.hasScope('write')");
+		            .antMatchers(HttpMethod.DELETE, "/**").access("#oauth2.hasScope('write')");*/
 		// @formatter:on
 	}
 

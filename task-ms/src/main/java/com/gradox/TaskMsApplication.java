@@ -12,7 +12,7 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
 @ComponentScan
 @EnableEurekaClient
 @EnableOAuth2Client
-@EnableCircuitBreaker
+@EnableCircuitBreaker	// DIFF
 public class TaskMsApplication {
 
 	public static void main(String[] args) {

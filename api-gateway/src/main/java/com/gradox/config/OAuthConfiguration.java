@@ -51,22 +51,19 @@ public class OAuthConfiguration extends WebSecurityConfigurerAdapter  {
 	 */
 	@Override
     public void configure(HttpSecurity http) throws Exception {
-        http
-        	.authorizeRequests()
+		System.out.println(http.toString());
+        http.authorizeRequests()
         	//Allow access to all static resources without authentication
-        	.antMatchers("/","/**/*.html").permitAll()
-//        	.and().authorizeRequests()
-        	//.antMatchers(HttpMethod.GET, "/api/loggedinuser/register").permitAll()
-//      	.anyRequest().authenticated()
-//        	.and().authorizeRequests()
-        	.antMatchers(HttpMethod.GET, "/api/user/**","/api/task/**").access("#oauth2.hasScope('read')")
+        	.antMatchers("/","/**/*.html").permitAll();
+        	/*.anyRequest().authenticated()
+        	.antMatchers("/api/user/**","/api/task/**").access("#oauth2.hasScope('read')")
             .antMatchers(HttpMethod.OPTIONS, "/api/user/**","/api/task/**").access("#oauth2.hasScope('read')")
             .antMatchers(HttpMethod.POST, "/api/user/**","/api/task/**").access("#oauth2.hasScope('write')")
             .antMatchers(HttpMethod.PUT, "/api/user/**","/api/task/**").access("#oauth2.hasScope('write')")
             .antMatchers(HttpMethod.PATCH, "/api/user/**","/api/task/**").access("#oauth2.hasScope('write')")
             .antMatchers(HttpMethod.DELETE, "/api/user/**","/api/task/**").access("#oauth2.hasScope('write')")
             .and().csrf().csrfTokenRepository(this.getCSRFTokenRepository())
-            .and().addFilterAfter(this.createCSRFHeaderFilter(), CsrfFilter.class);
+            .and().addFilterAfter(this.createCSRFHeaderFilter(), CsrfFilter.class);*/
     }
 	
 	/**
